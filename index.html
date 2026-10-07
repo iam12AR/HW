@@ -3,111 +3,98 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Pokédex Search</title>
+  <title>Pokédex Console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main class="page">
+  <main class="console">
 
-    <h1>Search Pokemon</h1>
-   
+    <!-- Console top: lens + LEDs -->
+    <header class="top">
+      <div class="lens"></div>
+      <div class="leds"><span class="r"></span><span class="y"></span><span class="g"></span></div>
+    </header>
 
-    <!-- Search form -->
-    <form id="search-form" class="search-form">
-      <input id="pokemon-input" type="text" placeholder="Enter a pokemon name" >
-      <button id="search-button" type="submit">Search</button>
-    </form>
+    <!-- The screen: only one view is visible at a time -->
+    <div class="screen" id="screen">
 
-    <!-- Quick search buttons -->
-    <div class="quick-buttons">
-      <button type="button" class="quick">Pikachu</button>
-      <button type="button" class="quick">Charizard</button>
-      <button type="button" class="quick">Bulbasaur</button>
-      <button type="button" class="quick">Squirtle</button>
-      <button type="button" class="quick">Gengar</button>
-      <button type="button" class="quick">Eevee</button>
+      <!-- 1. HOME -->
+      <section id="home" class="view active">
+        <h1 class="logo">POKÉ<span>DEX</span></h1>
+        <p class="blink">▶ INSERT A NAME TO START</p>
+
+        <form id="search-form" class="search-form" autocomplete="off">
+          <input id="pokemon-input" type="text" placeholder="PIKACHU" aria-label="Pokémon name">
+          <button id="search-button" type="submit">GO!</button>
+        </form>
+
+        <div class="menu" id="menu">
+          <button type="button" class="quick">Pikachu</button>
+          <button type="button" class="quick">Charizard</button>
+          <button type="button" class="quick">Bulbasaur</button>
+          <button type="button" class="quick">Squirtle</button>
+          <button type="button" class="quick">Gengar</button>
+          <button type="button" class="quick">Eevee</button>
+          <button type="button" class="quick" id="random">? Random</button>
+        </div>
+        <p id="msg" class="msg" role="alert"></p>
+      </section>
+
+      <!-- 2. THROW STAGE: the Poké Ball flies in here -->
+      <section id="stage" class="view">
+        <div id="ball" class="ball">
+          <div class="half top"></div>
+          <div class="half bottom"></div>
+          <div class="btn"></div>
+        </div>
+      </section>
+
+      <!-- 3. RESULT CARD -->
+      <section id="result" class="view">
+        <div class="card" id="card">
+          <div class="picture">
+            <span id="big-id" class="big-id"></span>
+            <img id="pokemon-image" src="" alt="">
+          </div>
+          <div class="info" id="info">
+            <h2 id="pokemon-name"></h2>
+            <p id="pokemon-number" class="dex-number"></p>
+
+            <div><h3>Types</h3><ul id="pokemon-types" class="tags"></ul></div>
+
+            <div>
+              <h3>Size</h3>
+              <div class="facts">
+                <div><span>Height</span><strong id="pokemon-height"></strong></div>
+                <div><span>Weight</span><strong id="pokemon-weight"></strong></div>
+              </div>
+            </div>
+
+            <div><h3>Abilities</h3><ul id="pokemon-abilities" class="tags"></ul></div>
+
+            <div><h3>Base stats</h3><div id="stats"></div></div>
+
+            <button type="button" id="back" class="back">◀ Back</button>
+          </div>
+        </div>
+      </section>
+
+      <div id="flash" class="flash"></div>
     </div>
 
-    <!-- MESSAGES: only one is visible at a time. JS switches them with display. -->
-    <div id="start-message" class="message">
-      Search above, or tap a Pokémon to see its stats.
-    </div>
-
-    <div id="loading" class="message loading" style="display: none;">
-      Loading...
-    </div>
-
-    <div id="error" class="message error" style="display: none;"></div>
-
-    <!-- Pokemon CARD: starts hidden. JS fills in the empty spots, then shows it. -->
-    <section id="result" class="card" style="display: none; flex-direction: column;">
-
-      <!-- Top: picture -->
-      <div class="picture">
-        <span id="pokemon-big-number" class="big-id"></span>
-        <img id="pokemon-image" src="" alt="">
+    <!-- Console controls (A = search, B = back) -->
+    <footer class="controls">
+      <div class="dpad"><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="ab">
+        <button type="button" id="btn-b" aria-label="Back">B</button>
+        <button type="button" id="btn-a" aria-label="Search">A</button>
       </div>
-
-      <!-- Bottom: details -->
-      <div class="info">
-        <h2 id="pokemon-name"></h2>
-        <p id="pokemon-number" class="dex-number"></p>
-
-        <h3>Types</h3>
-        <ul id="pokemon-types" class="tags"></ul>
-
-        <h3>Size</h3>
-        <div class="facts">
-          <div><span>Height</span><strong id="pokemon-height"></strong></div>
-          <div><span>Weight</span><strong id="pokemon-weight"></strong></div>
-        </div>
-
-        <h3>Abilities</h3>
-        <ul id="pokemon-abilities" class="tags"></ul>
-
-        <h3>Base stats</h3>
-
-        <div class="stat">
-          <span class="stat-name">HP</span>
-          <span id="number-hp" class="stat-number"></span>
-          <div class="bar"><div id="bar-hp" class="bar-fill"></div></div>
-        </div>
-
-        <div class="stat">
-          <span class="stat-name">Attack</span>
-          <span id="number-attack" class="stat-number"></span>
-          <div class="bar"><div id="bar-attack" class="bar-fill"></div></div>
-        </div>
-
-        <div class="stat">
-          <span class="stat-name">Defense</span>
-          <span id="number-defense" class="stat-number"></span>
-          <div class="bar"><div id="bar-defense" class="bar-fill"></div></div>
-        </div>
-
-        <div class="stat">
-          <span class="stat-name">Sp. Atk</span>
-          <span id="number-special-attack" class="stat-number"></span>
-          <div class="bar"><div id="bar-special-attack" class="bar-fill"></div></div>
-        </div>
-
-        <div class="stat">
-          <span class="stat-name">Sp. Def</span>
-          <span id="number-special-defense" class="stat-number"></span>
-          <div class="bar"><div id="bar-special-defense" class="bar-fill"></div></div>
-        </div>
-
-        <div class="stat">
-          <span class="stat-name">Speed</span>
-          <span id="number-speed" class="stat-number"></span>
-          <div class="bar"><div id="bar-speed" class="bar-fill"></div></div>
-        </div>
-
-      </div>
-    </section>
+    </footer>
 
   </main>
-
   <script src="script.js"></script>
 </body>
 </html>
